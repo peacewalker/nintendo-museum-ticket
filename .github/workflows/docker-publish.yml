@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Push ARM64 Docker Image
 
 on:
   push:
@@ -20,6 +20,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 依然需要 setup-qemu，因为构建环境本身是 amd64，需要它来交叉编译出 arm64
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -32,4 +39,8 @@ jobs:
         with:
           context: .
           push: true
+          # 这里修改为仅生成 arm64
+          platforms: linux/arm64
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
