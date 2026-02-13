@@ -7,6 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  # 这里会自动解析为你的用户名/仓库名，例如 peacewalker/nintendo-museum-ticket
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -20,7 +21,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 依然需要 setup-qemu，因为构建环境本身是 amd64，需要它来交叉编译出 arm64
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -39,8 +39,9 @@ jobs:
         with:
           context: .
           push: true
-          # 这里修改为仅生成 arm64
+          # 仅针对你的 ARM VPS 构建
           platforms: linux/arm64
+          # 仅生成 latest 标签，不生成 SHA 标签
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
